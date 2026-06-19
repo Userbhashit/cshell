@@ -5,7 +5,11 @@
 
 #define TOKEN_BUF_SIZE 8
 #define DELIMITERS " \t\n\r\a"
+
+void execute(char** command, int* exitCode);
 char** parseQuery(char* query);
+
+int exitCode = 0;
 
 int main(void) {
   char** command;
@@ -19,7 +23,9 @@ int main(void) {
       break;
 
     queryBuffer[bufferSize - 1] = '\0';
+    
     command = parseQuery(queryBuffer);
+    execute(command, &exitCode);
 
     free(command);
   }
@@ -56,5 +62,28 @@ char** parseQuery(char* query) {
 
   tokens[pos] = NULL;
   return tokens;
+}
+
+void execute(char** command, int* exitCode) {
+  pid_t pid = fork();
+
+  if (pid < 0) {
+    perror("fork");
+    return;
+  }
+  
+  if (pid == 0) {
+    if (execvp(command[0], command) == -1) {
+      perror("cshell");
+      exit(EXIT_FAILURE);
+    }
+  } else {
+    int status;
+    wait(&status);
+
+    if (!exitCode) return;
+
+    *exitCode = WIFEXITED(status) ? WEXITSTATUS(status) : -1;
+  }
 }
 
