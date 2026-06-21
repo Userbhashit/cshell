@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror -pedantic -std=c17 -Iinclude
+CFLAGS = -Wall -Wextra -Werror -pedantic -std=c23 -Iinclude
 
 SRC_DIR = src
 INC_DIR = include
