@@ -39,3 +39,11 @@ void cmdEcho(char** command) {
 
   printf("\n");
 }
+
+void cmdTrue(char**) {
+  exit(EXIT_SUCCESS);
+}
+
+void cmdFalse(char** command) {
+  exit ((command[1]) ? atoi(command[1]) : 1);
+}
