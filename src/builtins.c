@@ -11,3 +11,13 @@ struct builtins commands[] = {
 };
 int builtinsCmds = sizeof(commands)/sizeof(commands[0]);
 
+void (*getBuiltinCMDFunction(char* commandName)) (char**){
+  for (int i = 0; i < builtinsCmds; i++) {
+    if (strcmp(commands[i].name, commandName) == 0) {
+      return commands[i].fp;
+    }
+  }
+
+  return NULL;
+}
+
