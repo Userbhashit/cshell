@@ -2,7 +2,7 @@
 #define BUILTIN
 
 // returns the function pointer to appropriate command
-void (*getBuiltinFunction(char* cpmmandName)) (char**);
+void (*getBuiltinCMDFunction(char* cpmmandName)) (char**);
 
 // builtin commands declaration
 void cmdFalse(char** command);

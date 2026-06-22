@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "builtins.h"
 #include "parseAndExecute.h"
 
 int lastCommandExitCode;
@@ -45,7 +46,11 @@ void execute(char** command) {
   }
 
   if (pid == 0) {
-    if (execvp(command[0], command) == -1) {
+    void (*builtinCMD)(char**) = getBuiltinCMDFunction(command[0]);
+    if (builtinCMD) {
+      builtinCMD(command);
+      exit(EXIT_SUCCESS);
+    } else if (execvp(command[0], command) == -1) {
       perror("cshell");
       exit(EXIT_FAILURE);
     }
