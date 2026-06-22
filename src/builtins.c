@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "builtins.h"
+#include "parseAndExecute.h" // To get the lastCommandExitCode
 
 struct builtins commands[] = {
   {"true", cmdTrue},
@@ -21,3 +22,20 @@ void (*getBuiltinCMDFunction(char* commandName)) (char**){
   return NULL;
 }
 
+void cmdEcho(char** command) {
+  if (command[1] && (command[1][0] == '$')) {
+    if (command[1][1] == '?') {
+      printf("%d\n", lastCommandExitCode);
+      return;
+    }
+
+    char* env = getenv(command[1]+1);
+    printf("%s", (env) ? env : " ");
+  } else {
+    for (int i = 1; command[i]; i++) {
+      printf("%s ", command[i]);
+    }
+  }
+
+  printf("\n");
+}
