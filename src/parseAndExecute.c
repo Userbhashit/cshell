@@ -6,6 +6,8 @@
 #include "builtins.h"
 #include "parseAndExecute.h"
 
+// Helper function
+static void executeInChild(char** command, void(builtinsCmdFp)(char**));
 int lastCommandExitCode;
 
 char** parseQuery(char* query) {
@@ -38,27 +40,36 @@ char** parseQuery(char* query) {
 }
 
 void execute(char** command) {
+  if (!command || !command[0]) {
+    return;
+  }
+  bool runInParent;
+  void (*builtinCmdFp)(char**) = getBuiltinCMDFunction(command[0], &runInParent);
+  (builtinCmdFp && runInParent) ? builtinCmdFp(command) : executeInChild(command, builtinCmdFp);
+}
+
+static void executeInChild(char** command, void(builtinsCmdFp)(char**)) {
   pid_t pid = fork();
+  int status;
 
   if (pid < 0) {
-    perror("fork");
+    perror("Fork: ");
     return;
   }
 
+  // child process
   if (pid == 0) {
-    void (*builtinCMD)(char**) = getBuiltinCMDFunction(command[0]);
-    if (builtinCMD) {
-      builtinCMD(command);
+    if (builtinsCmdFp) {
+      builtinsCmdFp(command);
       exit(EXIT_SUCCESS);
     } else if (execvp(command[0], command) == -1) {
       perror("cshell");
       exit(EXIT_FAILURE);
-    }
+    } 
   } else {
-    int status;
+    // Parent process
     wait(&status);
 
     lastCommandExitCode = WIFEXITED(status) ? WEXITSTATUS(status) : -1;
   }
 }
-

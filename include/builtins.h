@@ -1,8 +1,8 @@
 #ifndef BUILTIN
 #define BUILTIN
 
-// returns the function pointer to appropriate command
-void (*getBuiltinCMDFunction(char* cpmmandName)) (char**);
+// returns the function pointer to appropriate command and where to run the process
+void (*getBuiltinCMDFunction(char* commandName, bool* runInParent)) (char**);
 
 // builtin commands declaration
 void cmdFalse(char** command);
@@ -12,6 +12,7 @@ void cmdTrue(char**);
 struct builtins {
   char* name;
   void (*fp)(char**); 
+  bool runInParent;
 };
 
 extern struct builtins commands[];

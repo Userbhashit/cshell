@@ -6,15 +6,16 @@
 #include "parseAndExecute.h" // To get the lastCommandExitCode
 
 struct builtins commands[] = {
-  {"true", cmdTrue},
-  {"false", cmdFalse},
-  {"echo", cmdEcho},
+  {"true", cmdTrue, false},
+  {"false", cmdFalse, false},
+  {"echo", cmdEcho, false},
 };
-int builtinsCmds = sizeof(commands)/sizeof(commands[0]);
+int builtinsCmdsLen = sizeof(commands)/sizeof(commands[0]);
 
-void (*getBuiltinCMDFunction(char* commandName)) (char**){
-  for (int i = 0; i < builtinsCmds; i++) {
+void (*getBuiltinCMDFunction(char* commandName, bool* runInParent)) (char**){
+  for (int i = 0; i < builtinsCmdsLen; i++) {
     if (strcmp(commands[i].name, commandName) == 0) {
+      *runInParent = commands[i].runInParent;
       return commands[i].fp;
     }
   }
@@ -38,6 +39,7 @@ void cmdEcho(char** command) {
   }
 
   printf("\n");
+  lastCommandExitCode = 0;
 }
 
 void cmdTrue(char**) {
