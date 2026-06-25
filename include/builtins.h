@@ -8,6 +8,8 @@ void (*getBuiltinCMDFunction(char* commandName, bool* runInParent)) (char**);
 void cmdFalse(char** command);
 void cmdEcho(char** command);
 void cmdTrue(char**);
+void cmdPwd(char**);
+void cmdCd(char**);
 
 struct builtins {
   char* name;
