@@ -18,7 +18,7 @@ int builtinsCmdsLen = sizeof(commands)/sizeof(commands[0]);
 void (*getBuiltinCMDFunction(char* commandName, bool* runInParent)) (char**){
   for (int i = 0; i < builtinsCmdsLen; i++) {
     if (strcmp(commands[i].name, commandName) == 0) {
-      *runInParent = commands[i].runInParent;
+      if (runInParent) *runInParent = commands[i].runInParent;
       return commands[i].fp;
     }
   }
