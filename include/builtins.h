@@ -5,6 +5,7 @@
 void (*getBuiltinCMDFunction(char* commandName, bool* runInParent)) (char**);
 
 // builtin commands declaration
+void cmdWhich(char** command);
 void cmdFalse(char** command);
 void cmdEcho(char** command);
 void cmdTrue(char**);

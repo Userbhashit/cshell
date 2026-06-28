@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
+#include <dirent.h>
 
 #include "builtins.h"
 #include "parseAndExecute.h" // To get the lastCommandExitCode
@@ -11,6 +12,7 @@ struct builtins commands[] = {
   {"pwd", cmdPwd, true},
   {"echo", cmdEcho, false},
   {"true", cmdTrue, false},
+  {"which", cmdWhich, false},
   {"false", cmdFalse, false},
 };
 int builtinsCmdsLen = sizeof(commands)/sizeof(commands[0]);
@@ -80,3 +82,57 @@ void cmdPwd(char**) {
     free(currentDir);
   }
 }
+
+int searchDir(char* dirPath, char* programName) {
+  DIR* dirPtr = opendir(dirPath);
+  if (!dirPtr) 
+    return 0;
+
+  struct dirent* dirData = readdir(dirPtr);
+  int found = 0;
+
+  while (dirData) {
+    if (strcmp(programName, dirData->d_name) == 0) {
+      printf("%s/%s\n", dirPath, dirData->d_name);
+      found = 1;
+      break;
+    }
+    dirData = readdir(dirPtr);
+  }
+
+  closedir(dirPtr);
+  return found;
+}
+
+void cmdWhich(char** command) {
+  if (!command || !command[1])
+    exit(EXIT_FAILURE);
+
+  if (getBuiltinCMDFunction(command[1], NULL)) {
+    printf("%s is a shell builtin command.\n", command[1]);
+    exit(EXIT_SUCCESS);
+  }
+
+  char* pathEnvPtr = getenv("PATH");
+  if (!pathEnvPtr) {
+    fprintf(stderr, "Unable to get PATH variable.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  char* pathEnv = strdup(pathEnvPtr);
+
+  const char* sep = ":\n";
+  char* dirPath = strtok(pathEnv, sep); 
+
+  while (dirPath) {
+    if (searchDir(dirPath, command[1])) {
+      exit(EXIT_SUCCESS);
+    } else {
+      dirPath = strtok(NULL, sep);
+   }
+  }
+
+  free(pathEnv);
+  exit(EXIT_FAILURE);
+}
+
