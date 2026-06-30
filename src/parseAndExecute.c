@@ -9,7 +9,35 @@
 
 // Helper function
 static void executeInChild(char** command, void(builtinsCmdFp)(char**));
+
 int lastCommandExitCode;
+
+static char* expandHomePath(char* token) {
+  char* newToken;
+  if (token && (token[0] == '~')) {
+    char* homePath = getenv("HOME");
+    if (!homePath) 
+      homePath = " ";
+
+    int len = strlen(homePath) + strlen(token); // we will skip '~' so we will have extra one for '\0'
+    newToken = malloc(len);
+
+    if (!newToken) {
+      fprintf(stderr, "Unable to allocate memory.\n");
+      exit(EXIT_FAILURE);
+    }
+    
+    snprintf(newToken, len, "%s%s", homePath, token+1);
+  } else {
+    newToken = strdup(token);
+    if (!newToken) {
+      fprintf(stderr, "Unable to allocate memory.\n");
+      exit(EXIT_FAILURE);
+    }
+  }
+
+  return newToken;
+}
 
 char** parseQuery(char* query) {
   size_t pos = 0, bufSize = TOKEN_BUF_SIZE;
@@ -21,7 +49,7 @@ char** parseQuery(char* query) {
   char* token = strtok(query, DELIMITERS);
 
   while (token) {
-    tokens[pos++] = token;
+    tokens[pos++] = expandHomePath(token);
 
     if (pos >= bufSize) {
       bufSize += TOKEN_BUF_SIZE;
@@ -73,4 +101,11 @@ static void executeInChild(char** command, void(builtinsCmdFp)(char**)) {
 
     lastCommandExitCode = WIFEXITED(status) ? WEXITSTATUS(status) : -1;
   }
+}
+
+void freCmd(char** command) {
+  for (int i = 0; command[i]; i++) {
+    free(command[i]);
+  }
+  free(command);
 }

@@ -6,6 +6,7 @@
 
 extern int lastCommandExitCode;
 
+void freCmd(char** command);
 void execute(char** command);
 char** parseQuery(char* query);
 

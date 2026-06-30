@@ -19,7 +19,7 @@ int main(void) {
     command = parseQuery(queryBuffer);
     execute(command);
 
-    free(command);
+    freCmd(command);  
   }
 
   free(queryBuffer);
